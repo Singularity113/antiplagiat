@@ -6,6 +6,7 @@ from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
 from spacy.lang.ru import Russian
 
+
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -89,9 +90,11 @@ class MainWindow(QMainWindow):
             self.error_file()
 
     def slot_btn(self):
-        self.text1 = self.first_content.toPlainText()
-        self.text2 = self.second_content.toPlainText()
-
+            self.text1 = self.first_content.toPlainText()
+            self.text2 = self.second_content.toPlainText()
+            self.w2 = Window2()
+            self.w2.show()
+         
         # nlp = Russian()
         # doc1 = nlp(self.text1)
         # doc2 = nlp(self.text2)
@@ -134,7 +137,15 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle('Ошибка!')
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
-
+class Window2(QWidget):
+    def __init__(self):
+        super(Window2, self).__init__()
+        self.setWindowTitle('Результат проверки на плагиат')
+        self.setGeometry(400,400,500,300)
+        title = QLabel('Результат: ', self)
+        self.setFont(QFont('Arial', 14))    
+        self.move(100, 100)
+     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow()
@@ -149,3 +160,5 @@ if __name__ == '__main__':
     #     msg.exec_()
     # sys.excepthook = my_exeption_hook
     sys.exit(app.exec_())
+
+

@@ -5,6 +5,7 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
 from spacy.lang.ru import Russian
+import re
 
 # Создание класса для основного окна
 class MainWindow(QMainWindow):
@@ -71,8 +72,13 @@ class MainWindow(QMainWindow):
             with self.file1: 
                 self.data1 = self.file1.read() # Записываем содержимое файла в переменную
             self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            self.first_content.setText(self.data1) # Заполняем поле для текста 
+            # self.t = re.sub("[^A-Za-z0-9-^А-Яа-я- \n]", "",self.data1)
+            self.t = re.sub(r'[^\w\s]', "",self.data1)
+            self.t = self.t.lower()
+            self.t2 = re.sub(r' и| а| но| да| или| либо| ни–ни| то–то| что| чтобы| как| потому что| так как| если| хотя| дабы| когда| хотя| бы| пусть| будто| словно| точно| у| о| или| что-то', "",self.t)
+            self.first_content.setText(self.t2) # Заполняем поле для текста 
             self.file1.close() # Закрываем файл
+            
         else: # В противном случае выдаем ошибку
             self.error_file()
 
@@ -84,7 +90,10 @@ class MainWindow(QMainWindow):
             with self.file2:
                 self.data2 = self.file2.read() # Записываем содержимое файла в переменную
             self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            self.second_content.setText(self.data2) # Заполняем поле для текста
+            self.t = re.sub(r'[^\w\s]', "",self.data2)
+            self.t = self.t.lower()
+            self.t2 = re.sub(r' и| а| но| да| или| либо| ни–ни| то–то| что| чтобы| как| потому что| так как| если| хотя| дабы| когда| хотя| бы| пусть| будто| словно| точно| у| о| или| что-то',"",self.t)
+            self.second_content.setText(self.t2) # Заполняем поле для текста
             self.file2.close() # Закрываем файл
         else:
             self.error_file() # В противном случае выдаем ошибку
@@ -139,6 +148,7 @@ class Window2(QWidget): # Класс для вывода окна с резул�
         title = QLabel('Результат: ', self) # Текст в окне() 
         self.setFont(QFont('Arial', 14)) # Текст в окне(arial, шрифт = 14)
         self.move(100, 100) # Окно выводится на 100 от левой стороны и на 100 сверху
+        
      
 if __name__ == '__main__':
     app = QApplication(sys.argv)
@@ -154,5 +164,4 @@ if __name__ == '__main__':
     #     msg.exec_()
     # sys.excepthook = my_exeption_hook
     sys.exit(app.exec_())
-
 

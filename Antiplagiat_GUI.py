@@ -1,10 +1,10 @@
 import sys # Подключение библиотек 
 import os
-import spacy
+import re
+import binascii
 from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
-from spacy.lang.ru import Russian
 
 # Создание класса для основного окна
 class MainWindow(QMainWindow):
@@ -90,10 +90,64 @@ class MainWindow(QMainWindow):
             self.error_file() # В противном случае выдаем ошибку
 
     def slot_btn(self): # Функция для проверки
-            self.text1 = self.first_content.toPlainText() # Записываем в переменную содержимое поля для текста 1
-            self.text2 = self.second_content.toPlainText() # Записываем в переменную содержимое поля для текста 2
-            self.w2 = Window2() # Вызываем второе окно для результата
-            self.w2.show() # Показываем второе окно для результата
+        self.text1 = self.first_content.toPlainText() # Записываем в переменную содержимое поля для текста 1
+        self.text2 = self.second_content.toPlainText() # Записываем в переменную содержимое поля для текста 2
+
+        self.source_1 = self.text1.lower()
+        self.source_2 = self.text2.lower()
+        self.source_1 = re.sub('[^а-я-0-9- ]', '', self.source_1)
+        self.source_2 = re.sub('[^а-я-0-9- ]', '', self.source_2)
+        stop_words = ['я','ты','он','она','они','мы','вы','оно','и','что-то',
+        'а','но','да','или','либо','ни–ни','то–то','что','чтобы','как','потому',
+        'что','так','как','если','дабы','когда','хотя','бы','пусть','будто',
+        'словно','точно','у','о','или','то','да','кто-то']
+        self.source_1 = " ".join([word for word in self.source_1.split() if word not in stop_words])
+        self.source_2 = " ".join([word for word in self.source_2.split() if word not in stop_words])
+
+        self.words_1 = self.source_1.split()
+        self.words_2 = self.source_2.split()
+        self.text_1 = []
+        self.text_2 = []
+        for word in self.words_1:
+            self.text_1.append(word)
+        for word in self.words_2:
+            self.text_2.append(word)
+            
+        shingleLen = 2
+        self.out_1 = []
+        self.out_2 = []
+        for i in range(len(self.text_1) - (shingleLen - 1)):
+            shingle_1 = [x for x in self.text_1[i:i + shingleLen]]
+            self.out_1.append(shingle_1)
+        for i in range(len(self.text_2) - (shingleLen - 1)):
+            shingle_2 = [x for x in self.text_2[i:i + shingleLen]]
+            self.out_2.append(shingle_2)
+
+        self.hash_1 = []
+        self.hash_2 = []
+        for el in self.out_1:
+            self.hash_1.append(binascii.crc32(' '.join(el).encode('utf-8')))
+        for el in self.out_2:
+            self.hash_2.append(binascii.crc32(' '.join(el).encode('utf-8')))
+
+        self.count = 0
+        for i in range(len(self.hash_1)):
+            for j in range(len(self.hash_2)):
+                if self.hash_1[i] == self.hash_2[j]:
+                    self.count += 1
+        if self.count > len(self.hash_1):
+            self.result = 100
+        else:
+            self.result = (self.count/len(self.hash_1)) * 100
+        self.show_result()
+
+    def show_result(self):
+        msg = QMessageBox() 
+        msg.setIcon(QMessageBox.Information) 
+        msg.setText(f'Результат проверки: {round(self.result, 2)}%') 
+        msg.setWindowTitle('Результат проверки') 
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
          
     def file_save1(self): # Функция для сохранения файла 1
         self.text1 = self.first_content.toPlainText() # Записываем текст из поля в переменную
@@ -130,16 +184,7 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle('Ошибка!') # Имя окна()
         msg.setStandardButtons(QMessageBox.Ok) # Стандартная кнопка = Ок (без кнопки = Отмена)
         msg.exec_() # Для показа окна
-        
-class Window2(QWidget): # Класс для вывода окна с результатом 
-    def __init__(self):
-        super(Window2, self).__init__()
-        self.setWindowTitle('Результат проверки на плагиат') # Наименование окна()
-        self.setGeometry(100,400,500,300) # Размер окна 500 на 300
-        title = QLabel('Результат: ', self) # Текст в окне() 
-        self.setFont(QFont('Arial', 14)) # Текст в окне(arial, шрифт = 14)
-        self.move(100, 100) # Окно выводится на 100 от левой стороны и на 100 сверху
-     
+         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow() # Запись в переменную Главного окна
@@ -154,5 +199,3 @@ if __name__ == '__main__':
     #     msg.exec_()
     # sys.excepthook = my_exeption_hook
     sys.exit(app.exec_())
-
-

@@ -132,11 +132,14 @@ class MainWindow(QMainWindow):
 
         self.count = 0
         for i in range(len(self.hash_1)):
-            for j in range((len(self.hash_2))):
-                if(self.hash_1[i] == self.hash_2[j]):
-                    self.count+=1
+            for j in range(len(self.hash_2)):
+                if self.hash_1[i] == self.hash_2[j]:
+                    self.count += 1
                     break
-        self.result = (self.count/len(self.hash_1)) * 100
+        if self.count > len(self.hash_1):
+            self.result = 100
+        else:
+            self.result = (self.count/len(self.hash_1)) * 100
         self.show_result()
 
     def show_result(self):

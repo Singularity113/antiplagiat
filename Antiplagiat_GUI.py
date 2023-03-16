@@ -1,11 +1,10 @@
 import sys # Подключение библиотек 
 import os
-import spacy
+import re
+import binascii
 from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
-from spacy.lang.ru import Russian
-import re
 
 # Создание класса для основного окна
 class MainWindow(QMainWindow):
@@ -72,13 +71,8 @@ class MainWindow(QMainWindow):
             with self.file1: 
                 self.data1 = self.file1.read() # Записываем содержимое файла в переменную
             self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            # self.t = re.sub("[^A-Za-z0-9-^А-Яа-я- \n]", "",self.data1)
-            self.t = re.sub(r'[^\w\s]', "",self.data1)
-            self.t = self.t.lower()
-            self.t2 = re.sub(r' и| а| но| да| или| либо| ни–ни| то–то| что| чтобы| как| потому что| так как| если| хотя| дабы| когда| хотя| бы| пусть| будто| словно| точно| у| о| или| что-то', "",self.t)
-            self.first_content.setText(self.t2) # Заполняем поле для текста 
+            self.first_content.setText(self.data1) # Заполняем поле для текста 
             self.file1.close() # Закрываем файл
-            
         else: # В противном случае выдаем ошибку
             self.error_file()
 
@@ -90,19 +84,71 @@ class MainWindow(QMainWindow):
             with self.file2:
                 self.data2 = self.file2.read() # Записываем содержимое файла в переменную
             self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            self.t = re.sub(r'[^\w\s]', "",self.data2)
-            self.t = self.t.lower()
-            self.t2 = re.sub(r' и| а| но| да| или| либо| ни–ни| то–то| что| чтобы| как| потому что| так как| если| хотя| дабы| когда| хотя| бы| пусть| будто| словно| точно| у| о| или| что-то',"",self.t)
-            self.second_content.setText(self.t2) # Заполняем поле для текста
+            self.second_content.setText(self.data2) # Заполняем поле для текста
             self.file2.close() # Закрываем файл
         else:
             self.error_file() # В противном случае выдаем ошибку
 
     def slot_btn(self): # Функция для проверки
-            self.text1 = self.first_content.toPlainText() # Записываем в переменную содержимое поля для текста 1
-            self.text2 = self.second_content.toPlainText() # Записываем в переменную содержимое поля для текста 2
-            self.w2 = Window2() # Вызываем второе окно для результата
-            self.w2.show() # Показываем второе окно для результата
+        self.text1 = self.first_content.toPlainText() # Записываем в переменную содержимое поля для текста 1
+        self.text2 = self.second_content.toPlainText() # Записываем в переменную содержимое поля для текста 2
+        # Канонизация
+        self.source_1 = self.text1.lower() # Делает весь текст в нижний регистр
+        self.source_2 = self.text2.lower()
+        self.source_1 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.source_1) # Убирает из текста все кроме цифр, букв, и "-"
+        self.source_2 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.source_2)
+        stop_words = ['я','ты','он','она','они','мы','вы','оно','и','что-то',
+        'а','но','да','или','либо','ни–ни','то–то','что','чтобы','как','потому',
+        'что','так','как','если','дабы','когда','хотя','бы','пусть','будто',
+        'словно','точно','у','о','или','то','да','кто-то']
+        self.source_1 = " ".join([word for word in self.source_1.split() if word not in stop_words]) # Убирает из текста стоп-слова
+        self.source_2 = " ".join([word for word in self.source_2.split() if word not in stop_words])
+        # Шинглы
+        self.words_1 = self.source_1.split() # Делит текст 
+        self.words_2 = self.source_2.split()
+        self.text_1 = [] # Создает список
+        self.text_2 = []
+        for word in self.words_1:
+            self.text_1.append(word) # Записывает отдельные слова в список
+        for word in self.words_2:
+            self.text_2.append(word)
+            
+        shingleLen = 2 # Длина шага в шингле
+        self.out_1 = []
+        self.out_2 = []
+        for i in range(len(self.text_1) - (shingleLen - 1)):
+            shingle_1 = [x for x in self.text_1[i:i + shingleLen]]
+            self.out_1.append(shingle_1) # Записывает шинглы по 2 слова с нахлестом в 1 слово в список
+        for i in range(len(self.text_2) - (shingleLen - 1)):
+            shingle_2 = [x for x in self.text_2[i:i + shingleLen]]
+            self.out_2.append(shingle_2)
+        # Хэширование
+        self.hash_1 = [] 
+        self.hash_2 = []
+        for el in self.out_1:
+            self.hash_1.append(binascii.crc32(' '.join(el).encode('utf-8'))) # Записывает шинглы после кодировки в список
+        for el in self.out_2:
+            self.hash_2.append(binascii.crc32(' '.join(el).encode('utf-8')))
+        # Алгоритм проверки
+        self.count = 0 # Счетчик
+        for i in range(len(self.hash_1)):
+            for j in range(len(self.hash_2)):
+                if self.hash_1[i] == self.hash_2[j]:
+                    self.count += 1
+                    break # Если хэши совпадают увеличиваем счетчик и переходим к след. хэшу
+        if self.count > len(self.hash_1): # Если счетчик больше длины 1-го хэша результат = 100
+            self.result = 100
+        else:
+            self.result = (self.count/len(self.hash_1)) * 100 # Формула для подсчета процента совпадения 
+        self.show_result()
+
+    def show_result(self): # Окно для вывода результата
+        msg = QMessageBox() 
+        msg.setIcon(QMessageBox.Information) 
+        msg.setText(f'Результат проверки: {round(self.result, 2)}%') # Округление результата до сотых
+        msg.setWindowTitle('Результат проверки') 
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
          
     def file_save1(self): # Функция для сохранения файла 1
         self.text1 = self.first_content.toPlainText() # Записываем текст из поля в переменную
@@ -139,17 +185,7 @@ class MainWindow(QMainWindow):
         msg.setWindowTitle('Ошибка!') # Имя окна()
         msg.setStandardButtons(QMessageBox.Ok) # Стандартная кнопка = Ок (без кнопки = Отмена)
         msg.exec_() # Для показа окна
-        
-class Window2(QWidget): # Класс для вывода окна с результатом 
-    def __init__(self):
-        super(Window2, self).__init__()
-        self.setWindowTitle('Результат проверки на плагиат') # Наименование окна()
-        self.setGeometry(100,400,500,300) # Размер окна 500 на 300
-        title = QLabel('Результат: ', self) # Текст в окне() 
-        self.setFont(QFont('Arial', 14)) # Текст в окне(arial, шрифт = 14)
-        self.move(100, 100) # Окно выводится на 100 от левой стороны и на 100 сверху
-        
-     
+         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow() # Запись в переменную Главного окна
@@ -164,4 +200,3 @@ if __name__ == '__main__':
     #     msg.exec_()
     # sys.excepthook = my_exeption_hook
     sys.exit(app.exec_())
-

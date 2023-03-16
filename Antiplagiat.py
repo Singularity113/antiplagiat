@@ -97,8 +97,8 @@ class MainWindow(QMainWindow):
         for i in range(3):
             self.s_1 = pairs[i][0]
             self.s_2 = pairs[i][1]
-            self.s_1 = re.sub('[^а-я-0-9- ]', '', self.s_1) # Убирает из текста все кроме цифр, букв, и "-"
-            self.s_2 = re.sub('[^а-я-0-9- ]', '', self.s_2)
+            self.source_1 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.source_1) # Убирает из текста все кроме цифр, букв, и "-"
+            self.source_2 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.source_2)
             self.s_1 = " ".join([word for word in self.s_1.split() if word not in stop_words]) # Убирает из текста стоп-слова
             self.s_2 = " ".join([word for word in self.s_2.split() if word not in stop_words])
             self.words_1 = self.s_1.split() # Делит текст 

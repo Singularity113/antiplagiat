@@ -3,6 +3,7 @@ import os
 import re
 import binascii
 from itertools import *
+from unittest import result
 from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
@@ -92,9 +93,9 @@ class MainWindow(QMainWindow):
                     f2.append(fs.read())       
         else:
              self.error_file()
+        full_result = []
         pairs = [*combinations(f2, 2)]
-        print(pairs)
-        for i in range(3):
+        for i in range(len(pairs)):
             self.s_1 = pairs[i][0]
             self.s_2 = pairs[i][1]
             self.s_1 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.s_1) # Убирает из текста все кроме цифр, букв, и "-"
@@ -134,9 +135,18 @@ class MainWindow(QMainWindow):
                         break # Если хэши совпадают увеличиваем счетчик и переходим к след. хэшу
             if self.count > len(self.hash_1): # Если счетчик больше длины 1-го хэша результат = 100
                 self.result = 100
+                full_result.append(self.result)
             else:
                 self.result = (self.count/len(self.hash_1)) * 100
-            print(self.result)
+                full_result.append(round(self.result, 2))
+        pairs_folders = [*combinations(files, 2)]
+        res = [list(res) for res in zip(pairs_folders, full_result)]
+        msg = QMessageBox() 
+        msg.setIcon(QMessageBox.Information) 
+        msg.setText(f'{res}') 
+        msg.setWindowTitle('Результат проверки в папке') 
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
 
     def slot_btn_first(self): # Функция для выбора 1-го файла
         self.first_content.clear() # Очищаем содержимое поля для ввода 1-го файла

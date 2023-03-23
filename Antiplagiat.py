@@ -143,7 +143,7 @@ class MainWindow(QMainWindow):
                 full_result.append(round(self.result, 2))
         pairs_folders = [*combinations(files, 2)]
         index = np.arange(len(pairs_folders))
-        plt.title('График парного сравнения')
+        plt.title('График парного сравнения файлов из папки')
         plt.grid(which='major')
         plt.barh(index, full_result)
         plt.yticks(index, pairs_folders)

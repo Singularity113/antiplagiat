@@ -2,6 +2,8 @@ import sys # Подключение библиотек
 import os
 import re
 import binascii
+import matplotlib.pyplot as plt
+import numpy as np
 from itertools import *
 from unittest import result
 from PyQt5.QtCore import *
@@ -140,13 +142,12 @@ class MainWindow(QMainWindow):
                 self.result = (self.count/len(self.hash_1)) * 100
                 full_result.append(round(self.result, 2))
         pairs_folders = [*combinations(files, 2)]
-        res = [list(res) for res in zip(pairs_folders, full_result)]
-        msg = QMessageBox() 
-        msg.setIcon(QMessageBox.Information) 
-        msg.setText(f'{res}') 
-        msg.setWindowTitle('Результат проверки в папке') 
-        msg.setStandardButtons(QMessageBox.Ok)
-        msg.exec_()
+        index = np.arange(len(pairs_folders))
+        plt.title('График парного сравнения')
+        plt.grid(which='major')
+        plt.barh(index, full_result)
+        plt.yticks(index, pairs_folders)
+        plt.show()
 
     def slot_btn_first(self): # Функция для выбора 1-го файла
         self.first_content.clear() # Очищаем содержимое поля для ввода 1-го файла

@@ -144,11 +144,17 @@ class MainWindow(QMainWindow):
         self.fileName_choose1, filetype = QFileDialog.getOpenFileName(self, "Выбрать 1-й файл", self.cwd, "Text Files (*.txt *.docx)") # Выбираем файл.txt и записываем путь в переменную
         if self.fileName_choose1 != '': # Если путь до файла не пустой выполняем: 
             if self.fileName_choose1.endswith('docx') and not self.fileName_choose1.startswith('~'):
+                self.btn_save1.setEnabled(False)
                 doc = docx.Document(self.fileName_choose1)
-                self.data1 = '\n'.join([p.text for p in doc.paragraphs])
+                text = []
+                for par in doc.paragraphs:
+                    if par.text!='':
+                        text.append(par.text)
+                self.data1 = '\n'.join(text)
                 self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
                 self.first_content.setText(self.data1) # Заполняем поле для текста 
             else:
+                self.btn_save1.setEnabled(True)
                 self.file1 = open(self.fileName_choose1, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
                 with self.file1: 
                     self.data1 = self.file1.read() # Записываем содержимое файла в переменную
@@ -163,11 +169,17 @@ class MainWindow(QMainWindow):
         self.fileName_choose2, filetype = QFileDialog.getOpenFileName(self, "Выбрать 2-й файл", self.cwd, "Text Files (*.txt *.docx)") # Выбираем файл.txt и записываем путь в переменную
         if self.fileName_choose2 != '': # Если путь до файла не пустой выполняем:
             if self.fileName_choose2.endswith('docx') and not self.fileName_choose2.startswith('~'):
+                self.btn_save2.setEnabled(False)
                 doc = docx.Document(self.fileName_choose2)
-                self.data2 = '\n'.join([p.text for p in doc.paragraphs])
+                text = []
+                for par in doc.paragraphs:
+                    if par.text!='':
+                        text.append(par.text)
+                self.data2 = '\n'.join(text)
                 self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
                 self.second_content.setText(self.data2) # Заполняем поле для текста 
             else:
+                self.btn_save2.setEnabled(True)
                 self.file2 = open(self.fileName_choose2, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
                 with self.file2:
                     self.data2 = self.file2.read() # Записываем содержимое файла в переменную

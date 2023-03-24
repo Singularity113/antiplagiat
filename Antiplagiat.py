@@ -97,7 +97,12 @@ class MainWindow(QMainWindow):
                 self.first_content.setText(f2[0])
                 self.second_content.setText(f2[1])
             elif len(f2) <= 1:
-                self.error_file()
+                msg = QMessageBox() 
+                msg.setIcon(QMessageBox.Information) 
+                msg.setText('Для проверки нужно больше 1-го файла') 
+                msg.setWindowTitle('Ошибка: нужно 2 или более файлов для проверки') 
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
             else:
                 full_result = []
                 pairs = [*combinations(f2, 2)]

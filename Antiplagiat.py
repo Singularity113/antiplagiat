@@ -2,6 +2,7 @@ import sys # Подключение библиотек
 import os
 import re
 import binascii
+import docx
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import *

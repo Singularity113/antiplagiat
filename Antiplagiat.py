@@ -149,7 +149,7 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if ((par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True))or((par.text == 'Введение')and(par.runs[0].bold==True)):
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
                         if (par.text!=''):
                             text.append(par.text)
                             per = True
@@ -157,6 +157,10 @@ class MainWindow(QMainWindow):
                     if per:
                         if (par.text!=''):
                             text.append(par.text)
+                if per!=True:
+                    for par in doc.paragraphs:
+                        if (par.text!='')and(par.text!='\n'):
+                                text.append(par.text)
                 self.data1 = '\n'.join(text)
                 self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
                 self.first_content.setText(self.data1) # Заполняем поле для текста 
@@ -181,7 +185,7 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if ((par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True))or((par.text == 'Введение')and(par.runs[0].bold==True)):
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
                         if (par.text!=''):
                             text.append(par.text)
                             per = True
@@ -189,6 +193,10 @@ class MainWindow(QMainWindow):
                     if per:
                         if (par.text!=''):
                             text.append(par.text)
+                if per!=True:
+                    for par in doc.paragraphs:
+                        if (par.text!='')and(par.text!='\n'):
+                                text.append(par.text)        
                 self.data2 = '\n'.join(text)
                 self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
                 self.second_content.setText(self.data2) # Заполняем поле для текста 

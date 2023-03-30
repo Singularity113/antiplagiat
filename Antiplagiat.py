@@ -2,6 +2,7 @@ import sys # Подключение библиотек
 import os
 import re
 import binascii
+import docx
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import *
@@ -161,27 +162,73 @@ class MainWindow(QMainWindow):
 
     def slot_btn_first(self): # Функция для выбора 1-го файла
         self.first_content.clear() # Очищаем содержимое поля для ввода 1-го файла
-        self.fileName_choose1, filetype = QFileDialog.getOpenFileName(self, "Выбрать 1-й файл", self.cwd, "Text Files (*.txt)") # Выбираем файл.txt и записываем путь в переменную
-        if self.fileName_choose1 != '': # Если путь до файла не пустой выполняем:
-            self.file1 = open(self.fileName_choose1, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
-            with self.file1: 
-                self.data1 = self.file1.read() # Записываем содержимое файла в переменную
-            self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            self.first_content.setText(self.data1) # Заполняем поле для текста 
-            self.file1.close() # Закрываем файл
+        self.fileName_choose1, filetype = QFileDialog.getOpenFileName(self, "Выбрать 1-й файл", self.cwd, "Text Files (*.txt *.docx)") # Выбираем файл.txt и записываем путь в переменную
+        if self.fileName_choose1 != '': # Если путь до файла не пустой выполняем: 
+            if self.fileName_choose1.endswith('docx') and not self.fileName_choose1.startswith('~'):
+                self.btn_save1.setEnabled(False)
+                doc = docx.Document(self.fileName_choose1)
+                text = []
+                per = False
+                for par in doc.paragraphs:
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
+                        if (par.text!=''):
+                            text.append(par.text)
+                            per = True
+                            continue
+                    if per:
+                        if (par.text!=''):
+                            text.append(par.text)
+                if per!=True:
+                    for par in doc.paragraphs:
+                        if (par.text!='')and(par.text!='\n'):
+                                text.append(par.text)
+                self.data1 = '\n'.join(text)
+                self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
+                self.first_content.setText(self.data1) # Заполняем поле для текста 
+            else:
+                self.btn_save1.setEnabled(True)
+                self.file1 = open(self.fileName_choose1, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
+                with self.file1: 
+                    self.data1 = self.file1.read() # Записываем содержимое файла в переменную
+                self.first_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
+                self.first_content.setText(self.data1) # Заполняем поле для текста 
+                self.file1.close() # Закрываем файл
         else: # В противном случае выдаем ошибку
             self.error_file()
 
     def slot_btn_second(self): # Функция для выбора 2-го файла
         self.second_content.clear() # Очищаем содержимое поля для ввода 2-го файла
-        self.fileName_choose2, filetype = QFileDialog.getOpenFileName(self, "Выбрать 2-й файл", self.cwd, "Text Files (*.txt)") # Выбираем файл.txt и записываем путь в переменную
+        self.fileName_choose2, filetype = QFileDialog.getOpenFileName(self, "Выбрать 2-й файл", self.cwd, "Text Files (*.txt *.docx)") # Выбираем файл.txt и записываем путь в переменную
         if self.fileName_choose2 != '': # Если путь до файла не пустой выполняем:
-            self.file2 = open(self.fileName_choose2, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
-            with self.file2:
-                self.data2 = self.file2.read() # Записываем содержимое файла в переменную
-            self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
-            self.second_content.setText(self.data2) # Заполняем поле для текста
-            self.file2.close() # Закрываем файл
+            if self.fileName_choose2.endswith('docx') and not self.fileName_choose2.startswith('~'):
+                self.btn_save2.setEnabled(False)
+                doc = docx.Document(self.fileName_choose2)
+                text = []
+                per = False
+                for par in doc.paragraphs:
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
+                        if (par.text!=''):
+                            text.append(par.text)
+                            per = True
+                            continue
+                    if per:
+                        if (par.text!=''):
+                            text.append(par.text)
+                if per!=True:
+                    for par in doc.paragraphs:
+                        if (par.text!='')and(par.text!='\n'):
+                                text.append(par.text)        
+                self.data2 = '\n'.join(text)
+                self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
+                self.second_content.setText(self.data2) # Заполняем поле для текста 
+            else:
+                self.btn_save2.setEnabled(True)
+                self.file2 = open(self.fileName_choose2, 'r', encoding='utf-8') # Открываем файл для чтения, делаем что бы русский отображался правильно
+                with self.file2:
+                    self.data2 = self.file2.read() # Записываем содержимое файла в переменную
+                self.second_content.setFontPointSize(14.0) # Устанавливаем размер шрифта = 14
+                self.second_content.setText(self.data2) # Заполняем поле для текста
+                self.file2.close() # Закрываем файл
         else:
             self.error_file() # В противном случае выдаем ошибку
 

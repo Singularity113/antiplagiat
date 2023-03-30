@@ -171,11 +171,12 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
-                        if (par.text!=''):
-                            text.append(par.text)
-                            per = True
-                            continue
+                    if len(par.runs)>1:
+                        if (par.runs[1].text == 'ВВЕДЕНИЕ')and(par.runs[1].bold==True):
+                            if (par.text!=''):
+                                text.append(par.text)
+                                per = True
+                                continue
                     if per:
                         if (par.text!=''):
                             text.append(par.text)
@@ -207,11 +208,12 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
-                        if (par.text!=''):
-                            text.append(par.text)
-                            per = True
-                            continue
+                    if len(par.runs)>1:
+                        if (par.runs[1].text == 'ВВЕДЕНИЕ')and(par.runs[1].bold==True):
+                            if (par.text!=''):
+                                text.append(par.text)
+                                per = True
+                                continue
                     if per:
                         if (par.text!=''):
                             text.append(par.text)

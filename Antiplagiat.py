@@ -2,8 +2,10 @@ import sys # Подключение библиотек
 import os
 import re
 import binascii
-import docx
+import matplotlib.pyplot as plt
+import numpy as np
 from itertools import *
+from unittest import result
 from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *
@@ -67,7 +69,7 @@ class MainWindow(QMainWindow):
 
         self.plainTextEdit = QPlainTextEdit()
         self.menuBar = self.menuBar() 
-        self.fileMenu = QMenu("Выбрать папку", self)
+        self.fileMenu = QMenu(" ⁝ ", self)
         self.menuBar.addMenu(self.fileMenu)
         self.newAction = QAction(self)
         self.openAction = QAction("Выбрать папку для проверки на уникальность", self)
@@ -90,54 +92,73 @@ class MainWindow(QMainWindow):
             for i in range (len(files)):
                 fs = open(f1[i], 'r', encoding='utf-8')
                 with fs:
-                    f2.append(fs.read())       
-        else:
-             self.error_file()
-        pairs = [*combinations(f2, 2)]
-        print(pairs)
-        for i in range(3):
-            self.s_1 = pairs[i][0]
-            self.s_2 = pairs[i][1]
-            self.s_1 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.s_1) # Убирает из текста все кроме цифр, букв, и "-"
-            self.s_2 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.s_2)
-            self.s_1 = " ".join([word for word in self.s_1.split() if word not in stop_words]) # Убирает из текста стоп-слова
-            self.s_2 = " ".join([word for word in self.s_2.split() if word not in stop_words])
-            self.words_1 = self.s_1.split() # Делит текст 
-            self.words_2 = self.s_2.split()
-            self.text_1 = [] # Создает список
-            self.text_2 = []
-            for word in self.words_1:
-                self.text_1.append(word) # Записывает отдельные слова в список
-            for word in self.words_2:
-                self.text_2.append(word)
-            shingleLen = 2 # Длина шага в шингле
-            self.out_1 = []
-            self.out_2 = []
-            for i in range(len(self.text_1) - (shingleLen - 1)):
-                shingle_1 = [x for x in self.text_1[i:i + shingleLen]]
-                self.out_1.append(shingle_1) # Записывает шинглы по 2 слова с нахлестом в 1 слово в список
-            for i in range(len(self.text_2) - (shingleLen - 1)):
-                shingle_2 = [x for x in self.text_2[i:i + shingleLen]]
-                self.out_2.append(shingle_2)
-                # Хэширование
-            self.hash_1 = [] 
-            self.hash_2 = []
-            for el in self.out_1:
-                self.hash_1.append(binascii.crc32(' '.join(el).encode('utf-8'))) # Записывает шинглы после кодировки в список
-            for el in self.out_2:
-                self.hash_2.append(binascii.crc32(' '.join(el).encode('utf-8')))
-                # Алгоритм проверки
-            self.count = 0 # Счетчик
-            for i in range(len(self.hash_1)):
-                for j in range(len(self.hash_2)):
-                    if self.hash_1[i] == self.hash_2[j]:
-                        self.count += 1
-                        break # Если хэши совпадают увеличиваем счетчик и переходим к след. хэшу
-            if self.count > len(self.hash_1): # Если счетчик больше длины 1-го хэша результат = 100
-                self.result = 100
+                    f2.append(fs.read())
+            if len(f2) == 2:
+                self.first_content.setText(f2[0])
+                self.second_content.setText(f2[1])
+            elif len(f2) <= 1:
+                msg = QMessageBox() 
+                msg.setIcon(QMessageBox.Information) 
+                msg.setText('Для проверки нужно больше 1-го файла') 
+                msg.setWindowTitle('Ошибка: нужно 2 или более файлов для проверки') 
+                msg.setStandardButtons(QMessageBox.Ok)
+                msg.exec_()
             else:
-                self.result = (self.count/len(self.hash_1)) * 100
-            print(self.result)
+                full_result = []
+                pairs = [*combinations(f2, 2)]
+                for i in range(len(pairs)):
+                    self.s_1 = pairs[i][0]
+                    self.s_2 = pairs[i][1]
+                    self.s_1 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.s_1) # Убирает из текста все кроме цифр, букв, и "-"
+                    self.s_2 = re.sub('[^A-Za-zа-я-0-9- ]', '', self.s_2)
+                    self.s_1 = " ".join([word for word in self.s_1.split() if word not in stop_words]) # Убирает из текста стоп-слова
+                    self.s_2 = " ".join([word for word in self.s_2.split() if word not in stop_words])
+                    self.words_1 = self.s_1.split() # Делит текст 
+                    self.words_2 = self.s_2.split()
+                    self.text_1 = [] # Создает список
+                    self.text_2 = []
+                    for word in self.words_1:
+                        self.text_1.append(word) # Записывает отдельные слова в список
+                    for word in self.words_2:
+                        self.text_2.append(word)
+                    shingleLen = 2 # Длина шага в шингле
+                    self.out_1 = []
+                    self.out_2 = []
+                    for i in range(len(self.text_1) - (shingleLen - 1)):
+                        shingle_1 = [x for x in self.text_1[i:i + shingleLen]]
+                        self.out_1.append(shingle_1) # Записывает шинглы по 2 слова с нахлестом в 1 слово в список
+                    for i in range(len(self.text_2) - (shingleLen - 1)):
+                        shingle_2 = [x for x in self.text_2[i:i + shingleLen]]
+                        self.out_2.append(shingle_2)
+                        # Хэширование
+                    self.hash_1 = [] 
+                    self.hash_2 = []
+                    for el in self.out_1:
+                        self.hash_1.append(binascii.crc32(' '.join(el).encode('utf-8'))) # Записывает шинглы после кодировки в список
+                    for el in self.out_2:
+                        self.hash_2.append(binascii.crc32(' '.join(el).encode('utf-8')))
+                        # Алгоритм проверки
+                    self.count = 0 # Счетчик
+                    for i in range(len(self.hash_1)):
+                        for j in range(len(self.hash_2)):
+                            if self.hash_1[i] == self.hash_2[j]:
+                                self.count += 1
+                                break # Если хэши совпадают увеличиваем счетчик и переходим к след. хэшу
+                    if self.count > len(self.hash_1): # Если счетчик больше длины 1-го хэша результат = 100
+                        self.result = 100
+                        full_result.append(self.result)
+                    else:
+                        self.result = (self.count/len(self.hash_1)) * 100
+                        full_result.append(round(self.result, 2))
+                pairs_folders = [*combinations(files, 2)]
+                index = np.arange(len(pairs_folders))
+                plt.title('График парного сравнения файлов из папки')
+                plt.grid(which='major')
+                plt.barh(index, full_result)
+                plt.yticks(index, pairs_folders)
+                plt.show()
+        else:
+            self.error_file()
 
     def slot_btn_first(self): # Функция для выбора 1-го файла
         self.first_content.clear() # Очищаем содержимое поля для ввода 1-го файла

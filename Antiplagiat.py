@@ -6,7 +6,6 @@ import docx
 import matplotlib.pyplot as plt
 import numpy as np
 from itertools import *
-from unittest import result
 from PyQt5.QtCore import *
 from PyQt5.QtGui import*
 from PyQt5.QtWidgets import *

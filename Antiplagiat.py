@@ -170,12 +170,11 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if len(par.runs)>1:
-                        if (par.runs[1].text == 'ВВЕДЕНИЕ')and(par.runs[1].bold==True):
-                            if (par.text!=''):
-                                text.append(par.text)
-                                per = True
-                                continue
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
+                        if (par.text!=''):
+                            text.append(par.text)
+                            per = True
+                            continue
                     if per:
                         if (par.text!=''):
                             text.append(par.text)
@@ -207,12 +206,11 @@ class MainWindow(QMainWindow):
                 text = []
                 per = False
                 for par in doc.paragraphs:
-                    if len(par.runs)>1:
-                        if (par.runs[1].text == 'ВВЕДЕНИЕ')and(par.runs[1].bold==True):
-                            if (par.text!=''):
-                                text.append(par.text)
-                                per = True
-                                continue
+                    if (par.text == 'ВВЕДЕНИЕ')and(par.runs[0].bold==True):
+                        if (par.text!=''):
+                            text.append(par.text)
+                            per = True
+                            continue
                     if per:
                         if (par.text!=''):
                             text.append(par.text)
@@ -351,13 +349,13 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = MainWindow() # Запись в переменную Главного окна
     window.showMaximized() # Показываем окно на весь экран
-    # sys.__excepthook__ = sys.excepthook  # Для замены системных ошибок на свои
-    # def my_exeption_hook(exctype, value, traceback):
-    #     msg = QMessageBox()
-    #     msg.setIcon(QMessageBox.Information)
-    #     msg.setText('Введены не верные данные')
-    #     msg.setWindowTitle('Ошибка!')
-    #     msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
-    #     msg.exec_()
-    # sys.excepthook = my_exeption_hook
+    sys.__excepthook__ = sys.excepthook  # Для замены системных ошибок на свои
+    def my_exeption_hook(exctype, value, traceback):
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Information)
+        msg.setText('Ошибка')
+        msg.setWindowTitle('Ошибка!')
+        msg.setStandardButtons(QMessageBox.Ok | QMessageBox.Cancel)
+        msg.exec_()
+    sys.excepthook = my_exeption_hook
     sys.exit(app.exec_())
